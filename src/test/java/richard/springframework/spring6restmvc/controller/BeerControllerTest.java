@@ -1,7 +1,7 @@
 package richard.springframework.spring6restmvc.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import richard.springframework.spring6restmvc.model.Beer;
+import richard.springframework.spring6restmvc.model.BeerDTO;
 import richard.springframework.spring6restmvc.model.BeerStyle;
 import richard.springframework.spring6restmvc.services.BeerService;
 import org.junit.jupiter.api.Test;
@@ -15,10 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -41,11 +38,11 @@ class BeerControllerTest {
     @Captor
     ArgumentCaptor<UUID> uuidArgumentCaptor;
     @Captor
-    ArgumentCaptor<Beer> beerArgumentCaptor;
+    ArgumentCaptor<BeerDTO> beerArgumentCaptor;
 
     @Test
     void testPatchBeer() throws Exception {
-        Beer beer = prepareStoredBeer1();
+        BeerDTO beer = prepareStoredBeer1();
 
         Map<String, Object> beerMap = new HashMap<>();
         beerMap.put("beerName", "New Name");
@@ -64,7 +61,8 @@ class BeerControllerTest {
 
     @Test
     void testDeleteBeer() throws Exception {
-        Beer beer = prepareStoredBeer1();
+        BeerDTO beer = prepareStoredBeer1();
+        given(beerService.deleteById(any())).willReturn(true);
 
         mockMvc.perform(delete(BEER_PATH_ID, beer.getId())
                         .accept(MediaType.APPLICATION_JSON))
@@ -78,22 +76,22 @@ class BeerControllerTest {
 
     @Test
     void testUpdateBeer() throws Exception {
-        Beer beer = prepareStoredBeer1();
-
+        BeerDTO beer = prepareStoredBeer1();
+        given(beerService.updateBeerById(any(), any())).willReturn(Optional.of(beer));
         mockMvc.perform(put(BEER_PATH_ID, beer.getId())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(beer)))
                 .andExpect(status().isNoContent());
 
-        verify(beerService).updateBeerById(any(UUID.class), any(Beer.class));
+        verify(beerService).updateBeerById(any(UUID.class), any(BeerDTO.class));
     }
 
     @Test
     void testCreateNewBeer() throws Exception {
 //        ObjectMapper objectMapper = new ObjectMapper();
 //        objectMapper.findAndRegisterModules();
-        Beer beer = prepareBeer();
+        BeerDTO beer = prepareBeer();
         given(beerService.saveNewBeer(beer)).willReturn(prepareStoredBeer1());
         mockMvc.perform(post(BEER_PATH)
                         .accept(MediaType.APPLICATION_JSON)
@@ -117,9 +115,18 @@ class BeerControllerTest {
     }
 
     @Test
+    void getBeerByIdNotFound() throws Exception {
+
+        given(beerService.getBeerById(any(UUID.class))).willReturn(Optional.empty());
+
+        mockMvc.perform(get(BeerController.BEER_PATH_ID, UUID.randomUUID()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void getBeerById() throws Exception {
-        Beer testBeer = prepareStoredBeer1();
-        given(beerService.getBeerById(testBeer.getId())).willReturn(testBeer);
+        BeerDTO testBeer = prepareStoredBeer1();
+        given(beerService.getBeerById(testBeer.getId())).willReturn(Optional.of(testBeer));
         mockMvc.perform(get(BEER_PATH_ID, testBeer.getId())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -128,8 +135,8 @@ class BeerControllerTest {
                 .andExpect(jsonPath("$.beerName", is(testBeer.getBeerName())));
     }
 
-    private static Beer prepareStoredBeer1() {
-        return Beer.builder()
+    private static BeerDTO prepareStoredBeer1() {
+        return BeerDTO.builder()
                 .id(UUID.randomUUID())
                 .version(1)
                 .beerName("Crank")
@@ -142,8 +149,8 @@ class BeerControllerTest {
                 .build();
     }
 
-    private static Beer prepareStoredBeer2() {
-        return Beer.builder()
+    private static BeerDTO prepareStoredBeer2() {
+        return BeerDTO.builder()
                 .id(UUID.randomUUID())
                 .version(1)
                 .beerName("Crank")
@@ -156,8 +163,8 @@ class BeerControllerTest {
                 .build();
     }
 
-    private static Beer prepareStoredBeer3() {
-        return Beer.builder()
+    private static BeerDTO prepareStoredBeer3() {
+        return BeerDTO.builder()
                 .id(UUID.randomUUID())
                 .version(1)
                 .beerName("Sunshine City")
@@ -170,8 +177,8 @@ class BeerControllerTest {
                 .build();
     }
 
-    private static Beer prepareBeer() {
-        return Beer.builder()
+    private static BeerDTO prepareBeer() {
+        return BeerDTO.builder()
                 .beerName("Galaxy Cat")
                 .beerStyle(BeerStyle.PALE_ALE)
                 .upc("12356")
