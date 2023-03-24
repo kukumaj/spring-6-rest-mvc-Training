@@ -59,7 +59,7 @@ class CustomerControllerTest {
         Map<String, Object> customerMap = new HashMap<>();
         customerMap.put("name", "New Name");
 
-        mockMvc.perform(patch( CustomerController.CUSTOMER_PATH_ID, customer.getId())
+        mockMvc.perform(patch(CustomerController.CUSTOMER_PATH_ID, customer.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(customerMap)))
                 .andExpect(status().isNoContent());

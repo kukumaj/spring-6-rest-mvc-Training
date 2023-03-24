@@ -52,6 +52,7 @@ class CustomerControllerIT {
             customerController.updateCustomerByID(UUID.randomUUID(), CustomerDTO.builder().build());
         });
     }
+
     @Rollback
     @Transactional
     @Test

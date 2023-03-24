@@ -8,6 +8,7 @@ import richard.springframework.spring6restmvc.model.BeerStyle;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
+
 @Getter
 @Setter
 @Builder

@@ -13,14 +13,13 @@ class BeerRepositoryTest {
     BeerRepository beerRepository;
 
 
-
     @Test
     void testSaveBeer() {
         Beer savedBeer = beerRepository.save(Beer.builder()
                 .beerName("My Beer")
                 .build());
-            assertThat(savedBeer).isNotNull();
-            assertThat(savedBeer.getId()).isNotNull();
+        assertThat(savedBeer).isNotNull();
+        assertThat(savedBeer.getId()).isNotNull();
 
     }
 }

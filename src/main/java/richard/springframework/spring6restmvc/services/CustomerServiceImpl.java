@@ -67,6 +67,7 @@ public class CustomerServiceImpl implements CustomerService {
         existing.setName(customer.getName());
         return Optional.of(existing);
     }
+
     @Override
     public CustomerDTO saveNewCustomer(CustomerDTO customer) {
 
